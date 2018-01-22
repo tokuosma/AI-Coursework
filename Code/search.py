@@ -87,36 +87,66 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
 
     stack = util.Stack() # LIFO-stack for storing fringe nodes
-    x,y = problem.getStartState()
-    exploredSet = set([(x,y)]) # Set for storing all explored squares
-    stack.push((problem.getStartState(), None, None, None))
+    startState = problem.getStartState()
+    exploredSet = set() # Set for storing all explored squares
+    stack.push(TreeNode(startState, None, None, None))
     while True:
         if(stack.isEmpty()):
-            print "FAILURE!"
-            return False
+            # Return failure if fringe is empty
+            return None
+
+        # Get top node from stack
         current = stack.pop()
-        successors = problem.getSuccessors(current[0])
+        if(problem.isGoalState(current.position)):
+            # If current leaf is goal, return the corresponding path
+            route = []
+            while current.parent != None:
+                route.append(current.action)
+                current = current.parent
+            route.reverse()
+            return route
+        # Add current node to explored set
+        exploredSet.add(current.position)
+
+        # Expand fringe
+        successors = problem.getSuccessors(current.position)
         for successor in successors:
-            if(problem.isGoalState(successor[0])):
-                print "GOAL FOUND! "
-                route = [successor[1]]
-                while current[3] != None:
-                    route.append(current[1])
-                    current = current[3]
-                route.reverse()
-                print "Route size: ", len(route)
-                return route
+            newNode = TreeNode(successor[0],successor[1],successor[2], current)
+            if newNode.position not in exploredSet :
+                stack.push(TreeNode(successor[0],successor[1],successor[2], current))
 
-            elif successor[0] not in exploredSet :
-                exploredSet.add(successor[0])
-                stack.push((successor[0],successor[1],successor[2], current))
-
+    # Should not reach this point, raise exception
     util.raiseNotDefined()
+
+class TreeNode:
+    """
+    Search-tree node data structure.
+    Attributes:
+        .position: Node position on level
+        .action: Action that was applied to parent node in order to transfer to this node
+        .cost: Cost of the action
+        .parent: Parent-node
+    """
+    def __init__(self, position, action, cost, parent):
+        self.position = position
+        self.action = action
+        self.cost = cost
+        self.parent = parent
+
+    def __str__(self):
+        text= "[("+ str(self.position) +"),'"+str(self.action)+"', "+str(self.cost)+ ", P:"
+        if self.parent != None and self.parent.position != None:
+            ppos = self.parent.position
+            text += str(ppos) + "]"
+        else:
+            text += "None)]"
+        return text
+
+    def __hash__(self):
+        hsh =  hash((self.position, self.action, self.cost))
+        return hsh
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
