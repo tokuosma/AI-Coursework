@@ -99,7 +99,7 @@ def depthFirstSearch(problem):
 
         # Get top node from stack
         current = stack.pop()
-        if(problem.isGoalState(current.position)):
+        if problem.isGoalState(current.state):
             # If current leaf is goal, return the corresponding path
             route = []
             while current.parent != None:
@@ -108,14 +108,14 @@ def depthFirstSearch(problem):
             route.reverse()
             return route
         # Add current node to explored set
-        exploredSet.add(current.position)
+        exploredSet.add(hash(current.state))
 
         # Expand fringe
-        successors = problem.getSuccessors(current.position)
+        successors = problem.getSuccessors(current.state)
         for successor in successors:
             newNode = TreeNode(successor[0],successor[1],successor[2], current)
-            if newNode.position not in exploredSet :
-                stack.push(TreeNode(successor[0],successor[1],successor[2], current))
+            if hash(newNode.state) not in exploredSet :
+                stack.push(newNode)
 
     # Should not reach this point, raise exception
     util.raiseNotDefined()
@@ -124,28 +124,19 @@ class TreeNode:
     """
     Search-tree node data structure.
     Attributes:
-        .position: Node position on level
-        .action: Action that was applied to parent node in order to transfer to this node
-        .cost: Cost of the action
+        .state: state of this node
+        .action: action to reach state
+        .cost: cost of the action
         .parent: Parent-node
     """
-    def __init__(self, position, action, cost, parent):
-        self.position = position
+    def __init__(self, state, action, cost, parent):
+        self.state= state
         self.action = action
         self.cost = cost
         self.parent = parent
 
-    def __str__(self):
-        text= "[("+ str(self.position) +"),'"+str(self.action)+"', "+str(self.cost)+ ", P:"
-        if self.parent != None and self.parent.position != None:
-            ppos = self.parent.position
-            text += str(ppos) + "]"
-        else:
-            text += "None)]"
-        return text
-
     def __hash__(self):
-        hsh =  hash((self.position, self.action, self.cost))
+        hsh =  hash(self.state)
         return hsh
 
 def breadthFirstSearch(problem):
@@ -155,7 +146,6 @@ def breadthFirstSearch(problem):
     startState = problem.getStartState()
     queue.push(TreeNode(startState, None, None, None))
     exploredSet = set()
-    counter = 0
     while True:
         if(queue.isEmpty()):
             # Return failure if fringe is empty
@@ -163,7 +153,7 @@ def breadthFirstSearch(problem):
 
         # Get top node from queue
         current = queue.pop()
-        if(problem.isGoalState(current.position)):
+        if(problem.isGoalState(current.state)):
             # If current leaf is goal, return the corresponding path
             route = []
             while current.parent != None:
@@ -173,13 +163,12 @@ def breadthFirstSearch(problem):
             return route
 
         # Expand fringe
-        if(current.position not in exploredSet):
-            successors = problem.getSuccessors(current.position)
+        if(hash(current.state) not in exploredSet):
+            successors = problem.getSuccessors(current.state)
             for successor in successors:
                 newNode = TreeNode(successor[0],successor[1],successor[2], current)
-                exploredSet.add(current.position)
+                exploredSet.add(hash(current.state))
                 queue.push(TreeNode(successor[0],successor[1],successor[2], current))
-        counter += 1
 
     # Should not reach this point, raise exception
     util.raiseNotDefined()
@@ -191,7 +180,6 @@ def uniformCostSearch(problem):
     startState = problem.getStartState()
     queue.push(TreeNode(startState, None, None, None),0)
     exploredSet = set()
-    counter = 0
     while True:
         if(queue.isEmpty()):
             # Return failure if fringe is empty
@@ -199,7 +187,7 @@ def uniformCostSearch(problem):
 
         # Get top node from queue
         current = queue.pop()
-        if(problem.isGoalState(current.position)):
+        if(problem.isGoalState(current.state)):
             # If current leaf is goal, return the corresponding path
             route = []
             while current.parent != None:
@@ -209,13 +197,12 @@ def uniformCostSearch(problem):
             return route
 
         # Expand fringe
-        if(current.position not in exploredSet):
-            successors = problem.getSuccessors(current.position)
+        if(hash(current.state) not in exploredSet):
+            successors = problem.getSuccessors(current.state)
             for successor in successors:
                 newNode = TreeNode(successor[0],successor[1],successor[2], current)
-                exploredSet.add(current.position)
+                exploredSet.add(hash(current.state))
                 queue.push(newNode,getCost(newNode))
-        counter += 1
 
     # Should not reach this point, raise exception
     util.raiseNotDefined()
@@ -242,7 +229,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     startState = problem.getStartState()
     queue.push(TreeNode(startState, None, None, None),0)
     exploredSet = set()
-    counter = 0
     while True:
         if(queue.isEmpty()):
             # Return failure if fringe is empty
@@ -250,7 +236,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
         # Get top node from queue
         current = queue.pop()
-        if(problem.isGoalState(current.position)):
+        if(problem.isGoalState(current.state)):
             # If current leaf is goal, return the corresponding path
             route = []
             while current.parent != None:
@@ -260,15 +246,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             return route
 
         # Expand fringe
-        if(current.position not in exploredSet):
-            successors = problem.getSuccessors(current.position)
+        if(hash(current.state) not in exploredSet):
+            successors = problem.getSuccessors(current.state)
             for successor in successors:
                 newNode = TreeNode(successor[0],successor[1],successor[2], current)
-                exploredSet.add(current.position)
+                exploredSet.add(hash(current.state))
                 #Calculate combined cost
-                combinedCost = getCost(newNode) + heuristic(newNode.position, problem)
+                combinedCost = getCost(newNode) + heuristic(newNode.state, problem)
                 queue.push(newNode,combinedCost)
-        counter += 1
 
     # Should not reach this point, raise exception
     util.raiseNotDefined()
