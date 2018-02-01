@@ -452,7 +452,53 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    position =  state[0]
+    foodGrid = state[1]
+    foodList = foodGrid.asList()
+
+    if(problem.isGoalState(state)):
+        return 0
+
+    distances = []
+    for food in foodList:
+        distances.append(manhattanDistance(position, food))
+
+    cost = max(distances)
+
+    """
+    #HOORAY ITSA TSP!
+    current = position
+    cost = 0
+    print "Foods: ", len(foodList)
+    while(len(foodList) > 0):
+        minDistance = 999999
+        minFood = None
+        for food in foodList:
+            distance = manhattanDistance(current,food)
+            if distance < minDistance:
+                minDistance = distance
+                minFood = food
+        cost += minDistance
+        current = minFood
+        foodList.remove(current)
+    print "Cost: " ,cost
+    """
+    return cost
+
+def manhattanDistance(position, destination):
+    xy1 = position
+    xy2 = destination
+    return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+
+def euclideanDistance(position, destination ):
+    xy1 = position
+    xy2 = problem.goal
+    return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+
+
+
+    #return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+    #position, foodGrid = state
     "*** YOUR CODE HERE ***"
     return 0
 
