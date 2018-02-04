@@ -463,27 +463,84 @@ def foodHeuristic(state, problem):
     for food in foodList:
         distances.append(manhattanDistance(position, food))
 
-    cost = max(distances)
+    cost = max(max(distances),primCost(position, foodList))
 
-    """
-    #HOORAY ITSA TSP!
-    current = position
-    cost = 0
-    print "Foods: ", len(foodList)
-    while(len(foodList) > 0):
-        minDistance = 999999
-        minFood = None
-        for food in foodList:
-            distance = manhattanDistance(current,food)
-            if distance < minDistance:
-                minDistance = distance
-                minFood = food
-        cost += minDistance
-        current = minFood
-        foodList.remove(current)
-    print "Cost: " ,cost
-    """
     return cost
+
+def primCost(start, P):
+    """
+    Returns the total weigth of a minimum spanning tree containing the startingPoint and
+    all the points in P. Edge weight is calculated as the euclidian distance between two points.
+
+    start: Starting point of the tree
+    P: list of all the unconnected points that must be added to the tree.
+    """
+    unconnected = P
+    connected = [start]
+
+    cost = 0
+    while(len(unconnected) > 0):
+        minDistance = 99999
+        minUnconnected = None
+        # Find the shortest edge between any connected and unconnected vertex
+        for c in connected:
+            for u in unconnected:
+                distance = euclideanDistance(c, u)
+                if distance < minDistance:
+                    minDistance = distance
+                    minUnconnected = u
+        unconnected.remove(minUnconnected)
+        connected.append(minUnconnected)
+        cost += minDistance
+
+    return cost
+
+def closestPairCost(start, P):
+    """
+    NOTE: FAILS AUTOGRADER CONSISTENCY TEST Q7/11 !!! DO NOT USE FOR CALCULATING THE FOOD HEURISTIC !!!
+    Returns the total path cost of the shortest path containin start point and all the points in P.
+    Path is constructed using the closest pair algorithm.
+
+    start: starting point (x,y) for the path
+    P: list of points the path must visit
+    """
+
+    unconnected = P
+    startPoint = endPoint = start
+    cost = 0
+
+    while(len(unconnected) > 0):
+        minStartD = 99999
+        minStart = None
+        minEndD = 99999
+        minEnd = None
+
+        # Get shortest distance from start point
+        for u in unconnected:
+            distance = euclideanDistance(startPoint, u)
+            if distance < minStartD:
+                minStartD = distance
+                minStart = u
+
+        # Get shortest distance from end point
+        for u in unconnected:
+            distance = euclideanDistance(endPoint, u)
+            if distance < minEndD:
+                minEndD = distance
+                minEnd = u
+
+        # Chooose shortest path to add
+        if minStartD < minEndD:
+            cost += minStartD
+            startPoint = minStart
+            unconnected.remove(minStart)
+        else:
+            cost += minEndD
+            endPoint = minEnd
+            unconnected.remove(minEnd)
+
+    return cost
+
 
 # Calculate manhatta distance of two (x,y) coordinates
 def manhattanDistance(position, destination):
@@ -494,7 +551,7 @@ def manhattanDistance(position, destination):
 # Calculate euclidean distance of two (x,y) coordinates
 def euclideanDistance(position, destination ):
     xy1 = position
-    xy2 = problem.goal
+    xy2 = destination
     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
 
 class ClosestDotSearchAgent(SearchAgent):
