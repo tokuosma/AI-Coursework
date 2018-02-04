@@ -485,22 +485,17 @@ def foodHeuristic(state, problem):
     """
     return cost
 
+# Calculate manhatta distance of two (x,y) coordinates
 def manhattanDistance(position, destination):
     xy1 = position
     xy2 = destination
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
+# Calculate euclidean distance of two (x,y) coordinates
 def euclideanDistance(position, destination ):
     xy1 = position
     xy2 = problem.goal
     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
-
-
-
-    #return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-    #position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -529,9 +524,7 @@ class ClosestDotSearchAgent(SearchAgent):
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.aStarSearch(problem, heuristic=search.nullHeuristic)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -565,9 +558,13 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        if( (x,y) in self.food.asList()):
+            #Current position has food --> GoalState
+            return True
+        return False
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+
 
 def mazeDistance(point1, point2, gameState):
     """
