@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.cornersSet = set()
 
     def getStartState(self):
         """
@@ -295,14 +296,18 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return (self.cornersSet, self.startingPosition)
+        
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if (1,1) in self.cornersSet and (1,top) in self.cornersSet and (right,1) in self.cornersSet and (right,top) in self.cornersSet:
+            return True
+		
 
     def getSuccessors(self, state):
         """
@@ -319,13 +324,21 @@ class CornersProblem(search.SearchProblem):
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
+            x,y = state[1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            if state[1] in self.corners:
+                self.cornersSet.add(state[1])
+            
+            if not hitsWall:
+                nextPosition = (nextx, nexty)
+                cost = 1
+                successors.append( ( (self.cornersTuple,nextPosition), action, cost) )
+            
+            
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
