@@ -414,7 +414,6 @@ def cornersHeuristic(state,problem):
             maxDistance = distance
             maxCorner = corner
 
-    print primCostVal, maxDistance
     return max(primCostVal,maxDistance)
 
 
