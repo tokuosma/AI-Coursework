@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -47,7 +47,7 @@ class ReflexAgent(Agent):
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
         #chosenIndex = bestIndices[-1]
-        
+
         "Add more of your code here if you want to"
         #print chosenIndex
 
@@ -69,26 +69,40 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
-        
+
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
+        foodList = newFood.asList()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
         score = successorGameState.getScore()
+        #score = scoreEvaluationFunction(successorGameState)
         ghostPositions = successorGameState.getGhostPositions()
-        #
+
+        for food in foodList:
+            score += 1.0/(manhattanDistance(newPos, food))
+
         if newFood[newPos[0]][newPos[1]] == True:
             score += 1
-            
+
         if newPos in ghostPositions:
-            score -= 3
-            print "eek!"
+            score -= 9999
+
+        for ghost in newGhostStates:
+            score += 0.2 * manhattanDistance(newPos,ghost.getPosition())
+
+        score += sum(newScaredTimes)
         #for state in newGhostStates:
         #print successorGameState.getGhostPositions()
         return score
+
+def manhattanDistance( xy1, xy2 ):
+    "Returns the Manhattan distance between points xy1 and xy2"
+    return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
+
 
 def scoreEvaluationFunction(currentGameState):
     """
