@@ -157,7 +157,76 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return self.minimaxAction(gameState)
+
+
+    def minimaxAction(self, state):
+        """
+        Select the minimax action for pacman
+        """
+        actions = state.getLegalActions(0)
+        maxVal = float("-inf")
+        maxAction = None
+        for action in actions:
+            val = self.minValue(state.generateSuccessor(0,action),1,0)
+            if val > maxVal:
+                maxVal = val
+                maxAction = action
+
+        return maxAction
+
+    def isTerminalState(self, state, currentDepth):
+        """
+        Checks if the state currently examined is a terminal state,
+        ie. state is a win/lose state or maximum search tree depth reached.
+        """
+        if(state.isWin() or state.isLose()):
+            return True
+        elif self.depth == currentDepth:
+            return True
+        else:
+            return False
+
+    def maxValue(self, state, currentDepth):
+        """
+        Recursive search function that returns the max value in minimax search
+        """
+        if self.isTerminalState(state, currentDepth):
+            return self.evaluationFunction(state) # returns the eval value if terminal state is reached
+        maxVal = float("-inf")
+        actions = state.getLegalActions(0)
+        successors = []
+        for action in actions:
+            successors.append(state.generateSuccessor(0, action))
+
+        for successor in successors:
+            maxVal = max(maxVal, self.minValue(successor, 1, currentDepth))
+
+        return maxVal
+
+    def minValue(self, state, idx, currentDepth):
+        """
+        Recursice search function that returns the min value in minimax search
+        """
+        if self.isTerminalState(state, currentDepth):
+            return self.evaluationFunction(state) # returns the eval value if terminal state is reached
+        minVal = float("inf")
+        actions = state.getLegalActions(idx)
+        successors = []
+
+        for action in actions:
+            successors.append(state.generateSuccessor(idx, action))
+
+        for successor in successors:
+            if idx == state.getNumAgents() -1 :
+                # All min players have had their turn --> move to next ply
+                minVal = min(minVal, self.maxValue(successor, currentDepth + 1))
+            else:
+                # Min player turns remaining --> move to next min player
+                minVal = min(minVal, self.minValue(successor, idx + 1, currentDepth))
+
+        return minVal
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
