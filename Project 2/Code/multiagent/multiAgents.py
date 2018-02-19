@@ -46,8 +46,10 @@ class ReflexAgent(Agent):
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-
+        #chosenIndex = bestIndices[-1]
+        
         "Add more of your code here if you want to"
+        #print chosenIndex
 
         return legalMoves[chosenIndex]
 
@@ -67,6 +69,7 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+        
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
@@ -74,7 +77,18 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        score = successorGameState.getScore()
+        ghostPositions = successorGameState.getGhostPositions()
+        #
+        if newFood[newPos[0]][newPos[1]] == True:
+            score += 1
+            
+        if newPos in ghostPositions:
+            score -= 3
+            print "eek!"
+        #for state in newGhostStates:
+        #print successorGameState.getGhostPositions()
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
