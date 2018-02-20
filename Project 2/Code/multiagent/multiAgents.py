@@ -49,7 +49,9 @@ class ReflexAgent(Agent):
         #chosenIndex = bestIndices[-1]
 
         "Add more of your code here if you want to"
-        #print chosenIndex
+        #print "best score: {}".format(bestScore)
+        #print "bestIndices: {}".format(bestIndices)
+
 
         return legalMoves[chosenIndex]
 
@@ -76,6 +78,7 @@ class ReflexAgent(Agent):
         foodList = newFood.asList()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        newCapsules = successorGameState.getCapsules()
 
         "*** YOUR CODE HERE ***"
         score = successorGameState.getScore()
@@ -84,19 +87,62 @@ class ReflexAgent(Agent):
 
         for food in foodList:
             score += 1.0/(manhattanDistance(newPos, food))
+            #print "foodpart: {}".format(1.0/(manhattanDistance(newPos, food))
+           
 
-        if newFood[newPos[0]][newPos[1]] == True:
-            score += 1
+
+        if newFood[newPos[0] - 1][newPos[1]] == True:
+            score += 2
+           #print "yay111!"
+            
+        if newFood[newPos[0]][newPos[1] + 1] == True:
+            score += 2
+            #print "yay222!"
+            
+        if newFood[newPos[0] + 1][newPos[1]] == True:
+            score += 2
+            #print "yay333!"
+            
+        if newFood[newPos[0]][newPos[1] - 1] == True:
+            score += 2
+            #print "yay4444!"
+            
+        for capsule in newCapsules:
+            score += 1.0/(manhattanDistance(newPos, capsule))
+            
+        if newScaredTimes == 0:
+             for ghost in newGhostStates:
+                score += 0.2 * manhattanDistance(newPos,ghost.getPosition()) 
+        else:
+            score += 0
 
         if newPos in ghostPositions:
             score -= 9999
+            print "eek! a ghost"
+        if (newPos[0]-1,newPos[1]) in ghostPositions:
+            score -= 9999
+            print "eek! a ghost on my left"        
+        if (newPos[0]+1,newPos[1]) in ghostPositions:
+            score -= 9999
+            print "eek! a ghost on my right"  
+        if (newPos[0],newPos[1]-1) in ghostPositions:
+            score -= 9999
+            print "eek! a ghost below me"  
+        if (newPos[0],newPos[1]+1) in ghostPositions:
+            score -= 9999
+            print "eek! a ghost above me"              
+            
+            
+            #print "ghostpart: {}".format(0.2 * manhattanDistance(newPos,ghost.getPosition()))
 
-        for ghost in newGhostStates:
-            score += 0.2 * manhattanDistance(newPos,ghost.getPosition())
-
+        #print newFood
+        
+        
         score += sum(newScaredTimes)
         #for state in newGhostStates:
         #print successorGameState.getGhostPositions()
+        print "new position: {}".format(newPos)
+        print "score: {}".format(score)
         return score
 
 def manhattanDistance( xy1, xy2 ):
