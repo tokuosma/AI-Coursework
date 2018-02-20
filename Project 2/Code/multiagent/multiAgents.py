@@ -131,7 +131,7 @@ class ReflexAgent(Agent):
         if (newPos[0],newPos[1]+1) in ghostPositions:
             score -= 9999
             print "eek! a ghost above me"              
-            
+        
             
             #print "ghostpart: {}".format(0.2 * manhattanDistance(newPos,ghost.getPosition()))
 
@@ -299,8 +299,80 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.expectimaxAction(gameState)
 
+        
+    def expectimaxAction(self, state):
+        """
+        Select the expectimax action for pacman
+        """
+        actions = state.getLegalActions(0)
+        maxVal = float("-inf")
+        maxAction = None
+        for action in actions:
+            val = self.expValue(state.generateSuccessor(0,action),1,0)
+            if val > maxVal:
+                maxVal = val
+                maxAction = action
+
+        return maxAction
+
+    def isTerminalState(self, state, currentDepth):
+        """
+        Checks if the state currently examined is a terminal state,
+        ie. state is a win/lose state or maximum search tree depth reached.
+        """
+        if(state.isWin() or state.isLose()):
+            return True
+        elif self.depth == currentDepth:
+            return True
+        else:
+            return False
+
+    def maxValue(self, state, currentDepth):
+        """
+        Recursive search function that returns the max value in expectimax search
+        """
+        if self.isTerminalState(state, currentDepth):
+            return self.evaluationFunction(state) # returns the eval value if terminal state is reached
+        maxVal = float("-inf")
+        actions = state.getLegalActions(0)
+        successors = []
+        for action in actions:
+            successors.append(state.generateSuccessor(0, action))
+
+        for successor in successors:
+            maxVal = max(maxVal, self.expValue(successor, 1, currentDepth))
+
+        return maxVal
+
+    def expValue(self, state, idx, currentDepth):
+        """
+        Recursive search function that returns the expected value in expectimax search
+        """
+        if self.isTerminalState(state, currentDepth):
+            return self.evaluationFunction(state) # returns the eval value if terminal state is reached
+
+        expVal = float(0)
+        actions = state.getLegalActions(idx)
+        successors = []
+        
+
+        for action in actions:
+            successors.append(state.generateSuccessor(idx, action))
+
+        for successor in successors:
+            #print state.getNumAgents()
+            if idx == state.getNumAgents() -1 :
+                # All exp players have had their turn --> move to next ply
+                expVal = expVal + float(float(float(1/float(len(actions))) * self.maxValue(successor, currentDepth + 1)))
+            else:
+                # exp player turns remaining --> move to next exp player
+                expVal = expVal + float(float(1/float(len(actions))) * self.expValue(successor, idx + 1, currentDepth))
+
+        return expVal
+        
+        
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
