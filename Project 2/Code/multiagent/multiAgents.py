@@ -88,61 +88,48 @@ class ReflexAgent(Agent):
         for food in foodList:
             score += 1.0/(manhattanDistance(newPos, food))
             #print "foodpart: {}".format(1.0/(manhattanDistance(newPos, food))
-           
+
 
 
         if newFood[newPos[0] - 1][newPos[1]] == True:
             score += 2
            #print "yay111!"
-            
+
         if newFood[newPos[0]][newPos[1] + 1] == True:
             score += 2
             #print "yay222!"
-            
+
         if newFood[newPos[0] + 1][newPos[1]] == True:
             score += 2
             #print "yay333!"
-            
+
         if newFood[newPos[0]][newPos[1] - 1] == True:
             score += 2
             #print "yay4444!"
-            
+
         for capsule in newCapsules:
             score += 1.0/(manhattanDistance(newPos, capsule))
-            
+
         if newScaredTimes == 0:
              for ghost in newGhostStates:
-                score += 0.2 * manhattanDistance(newPos,ghost.getPosition()) 
+                score += 0.2 * manhattanDistance(newPos,ghost.getPosition())
         else:
             score += 0
 
         if newPos in ghostPositions:
             score -= 9999
-            print "eek! a ghost"
         if (newPos[0]-1,newPos[1]) in ghostPositions:
             score -= 9999
-            print "eek! a ghost on my left"        
         if (newPos[0]+1,newPos[1]) in ghostPositions:
             score -= 9999
-            print "eek! a ghost on my right"  
         if (newPos[0],newPos[1]-1) in ghostPositions:
             score -= 9999
-            print "eek! a ghost below me"  
         if (newPos[0],newPos[1]+1) in ghostPositions:
             score -= 9999
-            print "eek! a ghost above me"              
-        
-            
-            #print "ghostpart: {}".format(0.2 * manhattanDistance(newPos,ghost.getPosition()))
 
-        #print newFood
-        
-        
         score += sum(newScaredTimes)
         #for state in newGhostStates:
         #print successorGameState.getGhostPositions()
-        print "new position: {}".format(newPos)
-        print "score: {}".format(score)
         return score
 
 def manhattanDistance( xy1, xy2 ):
@@ -242,11 +229,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return self.evaluationFunction(state) # returns the eval value if terminal state is reached
         maxVal = float("-inf")
         actions = state.getLegalActions(0)
-        successors = []
         for action in actions:
-            successors.append(state.generateSuccessor(0, action))
-
-        for successor in successors:
+            successor = state.generateSuccessor(0, action)
             maxVal = max(maxVal, self.minValue(successor, 1, currentDepth))
 
         return maxVal
@@ -259,12 +243,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return self.evaluationFunction(state) # returns the eval value if terminal state is reached
         minVal = float("inf")
         actions = state.getLegalActions(idx)
-        successors = []
 
         for action in actions:
-            successors.append(state.generateSuccessor(idx, action))
+            successor = state.generateSuccessor(idx, action)
 
-        for successor in successors:
             if idx == state.getNumAgents() -1 :
                 # All min players have had their turn --> move to next ply
                 minVal = min(minVal, self.maxValue(successor, currentDepth + 1))
@@ -284,7 +266,93 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.minimaxABAction(gameState)
+
+    def minimaxABAction(self, state):
+        """
+        Select the minimax action for pacman with alpha-beta pruning
+        """
+
+        # Initialize alpha and beta values
+        alpha = float("-inf")
+        beta = float("inf")
+
+        actions = state.getLegalActions(0)
+        maxVal = float("-inf")
+        maxAction = None
+        for action in actions:
+            val = self.minValueAB(state.generateSuccessor(0,action),alpha,beta,1,0)
+            if val > maxVal:
+                maxVal = val
+                maxAction = action
+            alpha = max(alpha, val)
+        return maxAction
+
+    def isTerminalState(self, state, currentDepth):
+        """
+        Checks if the state currently examined is a terminal state,
+        ie. state is a win/lose state or maximum search tree depth reached.
+        """
+        if(state.isWin() or state.isLose()):
+            return True
+        elif self.depth == currentDepth:
+            return True
+        else:
+            return False
+
+    def maxValueAB(self, state,alpha, beta, currentDepth):
+        """
+        Recursive search function that returns the max value in minimax search with alpha beta pruning
+        """
+
+        if self.isTerminalState(state, currentDepth):
+           return self.evaluationFunction(state) # returns the eval value if terminal state is reached
+
+        maxVal = float("-inf")
+        actions = state.getLegalActions(0)
+
+        for action in actions:
+            successor = state.generateSuccessor(0, action)
+            maxVal = max(maxVal, self.minValueAB(successor,alpha, beta, 1, currentDepth))
+            if maxVal > beta:
+               # MIN has already found a better path
+               # --> Rest of the successors can be pruned since this node will not be picked by MAX.
+               return maxVal
+            # Update alpha value if maxVal is better
+            alpha = max(alpha, maxVal)
+
+        return maxVal
+
+    def minValueAB(self, state,alpha, beta, idx, currentDepth):
+        """
+        Recursive search function that returns the min value in minimax search with alpha-beta pruning
+        """
+
+        if self.isTerminalState(state, currentDepth):
+            return self.evaluationFunction(state) # returns the eval value if terminal state is reached
+        minVal = float("inf")
+        actions = state.getLegalActions(idx)
+
+        for action in actions:
+            successor = state.generateSuccessor(idx, action)
+            if idx == state.getNumAgents() -1 :
+                # All min players have had their turn --> move to next ply
+                minVal = min(minVal, self.maxValueAB(successor,alpha, beta, currentDepth + 1))
+                if minVal < alpha:
+                    # MAX has already found a beter path
+                    # --> Rest of the successors can be pruned since this node will not be picked by MAX
+                    return minVal
+                beta = min(beta,minVal)
+
+            else:
+                # Min player turns remaining --> move to next min player
+                minVal = min(minVal, self.minValueAB(successor,alpha, beta,  idx + 1, currentDepth))
+                if minVal < alpha:
+                   return minVal
+                # Update beta if minVal is better
+                beta = min(beta,minVal)
+        return minVal
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -301,7 +369,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         return self.expectimaxAction(gameState)
 
-        
+
     def expectimaxAction(self, state):
         """
         Select the expectimax action for pacman
@@ -356,7 +424,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         expVal = float(0)
         actions = state.getLegalActions(idx)
         successors = []
-        
+
 
         for action in actions:
             successors.append(state.generateSuccessor(idx, action))
@@ -371,8 +439,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 expVal = expVal + float(float(1/float(len(actions))) * self.expValue(successor, idx + 1, currentDepth))
 
         return expVal
-        
-        
+
+
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
