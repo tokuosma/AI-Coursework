@@ -449,7 +449,55 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pos = currentGameState.getPacmanPosition()
+    foodGrid= currentGameState.getFood()
+    foodList = foodGrid.asList()
+    ghostStates = currentGameState.getGhostStates()
+    ghostPositions = currentGameState.getGhostPositions()
+    scaredTimers = [ghostState.scaredTimer for ghostState in ghostStates]
+    capsules = currentGameState.getCapsules()
+
+
+    # Get base score from game state
+    score = currentGameState.getScore()
+
+    for food in foodList:
+        score += 1.0/(manhattanDistance(pos, food))
+
+    if foodGrid[pos[0] - 1][pos[1]] == True:
+        score += 2
+
+    if foodGrid[pos[0]][pos[1] + 1] == True:
+        score += 2
+
+    if foodGrid[pos[0] + 1][pos[1]] == True:
+        score += 2
+
+    if foodGrid[pos[0]][pos[1] - 1] == True:
+        score += 2
+
+    for capsule in capsules:
+        score += 1.0/(manhattanDistance(pos, capsule))
+
+    if scaredTimers == 0:
+         for ghost in newGhostStates:
+            score += 0.2 * manhattanDistance(pos,ghost.getPosition())
+    else:
+        score += 0
+
+    if pos in ghostPositions:
+        score -= 9999
+    if (pos[0]-1,pos[1]) in ghostPositions:
+        score -= 9999
+    if (pos[0]+1,pos[1]) in ghostPositions:
+        score -= 9999
+    if (pos[0],pos[1]-1) in ghostPositions:
+        score -= 9999
+    if (pos[0],pos[1]+1) in ghostPositions:
+        score -= 9999
+
+    score += sum(scaredTimers)
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
